@@ -75,3 +75,7 @@ class CheckedResult(BaseModel):
     checked_recommendations: list[AgentRecommendation] = Field(default_factory=list)
     missing_fields: list[NonBlank] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
+    # Why proposed recommendations were rejected; fed back to the agent on retry.
+    rejections: list[str] = Field(default_factory=list)
+    # User-facing Arabic explanations for each missing field.
+    missing_explanations: list[str] = Field(default_factory=list)

@@ -41,6 +41,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 ::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 8px; }
 @keyframes shimmer { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 
+/* Team addition: loading spinner for the web search. */
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-row { display: flex; align-items: center; gap: 10px; }
+.spinner {
+  width: 20px; height: 20px; flex: none; border-radius: 50%;
+  border: 3px solid var(--line-3); border-top-color: var(--accent);
+  animation: spin .8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+
 .mono { font-family: var(--mono); }
 .small { font-size: 13px; }
 .muted { color: var(--ink-3); margin: 0; font-size: 15px; }

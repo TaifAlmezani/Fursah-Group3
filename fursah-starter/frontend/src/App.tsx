@@ -82,6 +82,7 @@ export default function App() {
         <SearchResults
           view={view}
           res={res}
+          webRequest={submitted.current ? { request_id: null, ...submitted.current } : null}
           onEditProfile={() => setEditing(true)}
           onResolve={choice => runDiscover(profile, constraints, choice)}
           onRetry={() => runDiscover()}

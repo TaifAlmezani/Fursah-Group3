@@ -1,0 +1,14 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+
+# Node
+node_modules/
+
+# Jupyter
+.ipynb_checkpoints/

@@ -34,9 +34,17 @@ class Settings(BaseSettings):
 
     model_timeout_seconds: int = Field(default=40, gt=0)
     workflow_timeout_seconds: int = Field(default=90, gt=0)
-    model_max_retries: int = Field(default=1, ge=0)
+    # Retries of failed connections; not billed. 3 copes with an unstable network.
+    model_max_retries: int = Field(default=3, ge=0)
     model_output_retries: int = Field(default=1, ge=0)
     max_workflow_steps: int = Field(default=8, gt=0)
+    # Hard cap on billable model calls per discovery request (team cost control).
+    max_model_calls: int = Field(default=6, gt=0)
+
+    # Optional web search (Tavily), only when the user asks after a no-match result.
+    tavily_api_key: str = Field(default="", repr=False)
+    web_search_max_queries: int = Field(default=2, gt=0)
+    web_search_max_model_calls: int = Field(default=4, gt=0)
 
     data_dir: Path = PROJECT_ROOT / "data"
     allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"

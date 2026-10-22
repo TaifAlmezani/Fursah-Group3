@@ -1,10 +1,13 @@
-import type { DiscoveryResponse, Recommendation, ViewState } from '../types';
+import type { DiscoveryRequest, DiscoveryResponse, Recommendation, ViewState } from '../types';
 import { fieldLabel, ERROR_MESSAGES } from '../labels';
 import OpportunityCard from './OpportunityCard';
+import WebSearch from './WebSearch';
 
 interface Props {
   view: ViewState;
   res: DiscoveryResponse | null;
+  /** The submitted search, offered to the optional web search after no_match. */
+  webRequest: DiscoveryRequest | null;
   onResolve: (choice: 'profile' | 'query') => void;
   onEditProfile: () => void;
   onRetry: () => void;
@@ -13,7 +16,7 @@ interface Props {
 }
 
 /** Renders exactly one of: initial / loading / ok / needs_info / no_match / error. */
-export default function SearchResults({ view, res, onEditProfile, onRetry, onFocusQuery, onOpenDetails, onResolve }: Props) {
+export default function SearchResults({ view, res, webRequest, onEditProfile, onRetry, onFocusQuery, onOpenDetails, onResolve }: Props) {
   return (
     <section className="results" aria-live="polite" aria-label="النتائج">
       {res?.interpreted_filters?.length ? <div className="notice"><strong>فهمنا بحثك بهذه القيود:</strong><ul>{res.interpreted_filters.map(f => <li key={f}>{f}</li>)}</ul></div> : null}
@@ -76,6 +79,7 @@ export default function SearchResults({ view, res, onEditProfile, onRetry, onFoc
             <button className="btn btn--primary" onClick={onEditProfile}>تعديل الملف والقيود</button>
             <button className="btn btn--quiet" onClick={onFocusQuery}>تعديل البحث</button>
           </div>
+          <WebSearch key={res?.request_id} request={webRequest} />
         </div>
       )}
 

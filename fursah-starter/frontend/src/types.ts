@@ -112,3 +112,21 @@ export interface OpportunityDetails {
 }
 
 export type ApiResult<T> = { ok: true; data: T } | { ok: false; error_code: string };
+
+/** Team addition: user-approved web search (backend/app/web_search.py). Not recommendations. */
+export interface WebResult {
+  title: string;
+  url: string;
+  site: string;
+  summary: string;
+  published_date?: string | null;
+}
+
+export interface WebSearchResponse {
+  request_id: string;
+  status: 'ok' | 'no_results';
+  message: string;
+  results: WebResult[];
+  disclaimer: string;
+  queries: string[];
+}

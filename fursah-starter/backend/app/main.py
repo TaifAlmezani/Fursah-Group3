@@ -7,12 +7,16 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from . import routes
+from . import routes, web_routes
 from .infrastructure.config import get_settings
 from .infrastructure.errors import ErrorCode
+from .infrastructure.observability import setup_observability
 from .schemas import ApiErrorDetail, ApiErrorResponse
 
 settings = get_settings()
+# Day 4: Phoenix tracing, once at startup and before the first request. A no-op unless
+# FURSAH_PHOENIX_ENABLED=true; evals/run_eval.py calls it first, and a second call does nothing.
+setup_observability()
 
 app = FastAPI(
     title="FURSAH API",
@@ -29,6 +33,7 @@ app.add_middleware(
 )
 
 app.include_router(routes.router)
+app.include_router(web_routes.router)  # team addition: user-approved web search
 
 
 @app.exception_handler(RequestValidationError)

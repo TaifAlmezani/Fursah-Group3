@@ -73,7 +73,7 @@ def get_app_dependencies() -> AppDependencies:
     settings = get_settings()
     bridge = DatasetLoader(settings)
     tracer = Tracer(settings.trace_jsonl_path)
-    repository = OpportunityRepository(bridge)
+    repository = OpportunityRepository(bridge, clock=settings.resolve_evaluation_time)
     return AppDependencies(
         settings=settings,
         bridge=bridge,

@@ -1,12 +1,13 @@
 /** The only HTTP boundary. Field names match backend/app/schemas.py; no fallback data. */
 import { validateConstraints } from '../profile/profile';
 import { fieldLabel } from '../labels';
-import type { ApiResult, DiscoveryRequest, DiscoveryResponse, OpportunityDetails, Recommendation } from '../types';
+import type { ApiResult, DiscoveryRequest, DiscoveryResponse, OpportunityDetails, Recommendation, WebResult, WebSearchResponse } from '../types';
 
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || 'http://localhost:8000').replace(/\/+$/, '');
 const TIMEOUT_MS = 100_000;
 const DISCOVER_PATH = '/api/v1/discover';
 const DETAILS_PATH = '/api/v1/opportunities/';
+const WEB_SEARCH_PATH = '/api/v1/web-search';
 
 type JsonObject = Record<string, unknown>;
 type HttpResult = { kind: 'http'; status: number; body: unknown } | { kind: 'failure'; code: string };
@@ -113,6 +114,29 @@ export async function discover(request: DiscoveryRequest, signal?: AbortSignal):
     return failure(requestId, code, response.status === 422 ? validationMessage(response.body) : '');
   }
   return validDiscovery(response.body) ? response.body : failure(requestId, 'FURSAH_BAD_RESPONSE');
+}
+
+function validWebResult(value: unknown): value is WebResult {
+  if (!object(value) || !nonempty(value.title) || !nonempty(value.site) || typeof value.summary !== 'string'
+    || !optionalText(value.published_date) || !nonempty(value.url)) return false;
+  try { return new URL(value.url).protocol === 'https:'; } catch { return false; }
+}
+
+function validWebSearch(value: unknown): value is WebSearchResponse {
+  return object(value) && nonempty(value.request_id) && (value.status === 'ok' || value.status === 'no_results')
+    && typeof value.message === 'string' && typeof value.disclaimer === 'string' && strings(value.queries)
+    && Array.isArray(value.results) && value.results.length <= 3 && value.results.every(validWebResult);
+}
+
+/** Team addition: user-approved web search after a no-match result. */
+export async function webSearch(request: DiscoveryRequest, signal?: AbortSignal): Promise<ApiResult<WebSearchResponse>> {
+  const response = await send(WEB_SEARCH_PATH, {
+    method: 'POST', signal, body: JSON.stringify({ ...request, query: request.query.trim() }),
+  });
+  if (response.kind === 'failure') return { ok: false, error_code: response.code };
+  if (response.status < 200 || response.status >= 300)
+    return { ok: false, error_code: errorCode(response.body) ?? `FURSAH_HTTP_${response.status}` };
+  return validWebSearch(response.body) ? { ok: true, data: response.body } : { ok: false, error_code: 'FURSAH_BAD_RESPONSE' };
 }
 
 export async function getOpportunity(id: string): Promise<ApiResult<OpportunityDetails>> {
